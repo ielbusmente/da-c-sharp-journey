@@ -15,3 +15,5 @@ catch (Exception e)
     Console.WriteLine("Error: " + e.ToString());
 }
 
+// for debugging, go to View tab, and then select Command Pallete (Ctrl + Shift + P), 
+// enter .net: g and then select .NET: Generate Assets for Build and Debug.
