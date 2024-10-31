@@ -17,19 +17,19 @@ is used to ensure that logic in the MakeChange method is working as
 expected.
 */
 
-string? readResult = null;
+string? readResult;
 bool useTestData = false;
 
 Console.Clear();
 
-int[] cashTill = new int[] { 0, 0, 0, 0 };
-int registerCheckTillTotal = 0;
+int[] cashTill = [0, 0, 0, 0];
+int registerCheckTillTotal;
 
 // registerDailyStartingCash: $1 x 50, $5 x 20, $10 x 10, $20 x 5 => ($350 total)
 int[,] registerDailyStartingCash = new int[,] { { 1, 50 }, { 5, 20 }, { 10, 10 }, { 20, 5 } };
 
-int[] testData = new int[] { 6, 10, 17, 20, 31, 36, 40, 41 };
-int testCounter = 0;
+int[] testData = [6, 10, 17, 20, 31, 36, 40, 41];
+int counter = 0;
 
 LoadTillEachMorning(registerDailyStartingCash, cashTill);
 
@@ -57,13 +57,10 @@ if (useTestData)
 while (transactions > 0)
 {
     transactions -= 1;
-    int itemCost = valueGenerator.Next(2, 50);
+    int itemCost = valueGenerator.Next(2, 49);
 
     if (useTestData)
-    {
-        itemCost = testData[testCounter];
-        testCounter += 1;
-    }
+        itemCost = testData[counter];
 
     int paymentOnes = itemCost % 2;                 // value is 1 when itemCost is odd, value is 0 when itemCost is even
     int paymentFives = (itemCost % 10 > 7) ? 1 : 0; // value is 1 when itemCost ends with 8 or 9, otherwise value is 0
@@ -71,7 +68,7 @@ while (transactions > 0)
     int paymentTwenties = (itemCost < 20) ? 1 : 2;  // value is 1 when itemCost < 20, otherwise value is 2
 
     // display messages describing the current transaction
-    Console.WriteLine($"Customer is making a ${itemCost} purchase");
+    Console.WriteLine($"Customer ({counter++ + 1}) is making a ${itemCost} purchase");
     Console.WriteLine($"\t Using {paymentTwenties} twenty dollar bills");
     Console.WriteLine($"\t Using {paymentTens} ten dollar bills");
     Console.WriteLine($"\t Using {paymentFives} five dollar bills");
@@ -99,7 +96,6 @@ Console.WriteLine("Press the Enter key to exit");
 do
 {
     readResult = Console.ReadLine();
-
 } while (readResult == null);
 
 
@@ -114,10 +110,10 @@ static void LoadTillEachMorning(int[,] registerDailyStartingCash, int[] cashTill
 
 static void MakeChange(int cost, int[] cashTill, int twenties, int tens = 0, int fives = 0, int ones = 0)
 {
-    int availableTwenties = cashTill[3] + twenties;
-    int availableTens = cashTill[2] + tens;
-    int availableFives = cashTill[1] + fives;
-    int availableOnes = cashTill[0] + ones;
+    int tempTwenties = cashTill[3] + twenties;
+    int tempTens = cashTill[2] + tens;
+    int tempFives = cashTill[1] + fives;
+    int tempOnes = cashTill[0] + ones;
 
     int amountPaid = twenties * 20 + tens * 10 + fives * 5 + ones;
     int changeNeeded = amountPaid - cost;
@@ -127,30 +123,30 @@ static void MakeChange(int cost, int[] cashTill, int twenties, int tens = 0, int
 
     Console.WriteLine("Cashier prepares the following change:");
 
-    while ((changeNeeded > 19) && (availableTwenties > 0))
+    while ((changeNeeded > 19) && (tempTwenties > 0))
     {
-        availableTwenties--;
+        tempTwenties--;
         changeNeeded -= 20;
         Console.WriteLine("\t A twenty");
     }
 
-    while ((changeNeeded > 9) && (availableTens > 0))
+    while ((changeNeeded > 9) && (tempTens > 0))
     {
-        availableTens--;
+        tempTens--;
         changeNeeded -= 10;
         Console.WriteLine("\t A ten");
     }
 
-    while ((changeNeeded > 4) && (availableFives > 0))
+    while ((changeNeeded > 4) && (tempFives > 0))
     {
-        availableFives--;
+        tempFives--;
         changeNeeded -= 5;
         Console.WriteLine("\t A five");
     }
 
-    while ((changeNeeded > 0) && (availableOnes > 0))
+    while ((changeNeeded > 0) && (tempOnes > 0))
     {
-        availableOnes--;
+        tempOnes--;
         changeNeeded -= 1;
         Console.WriteLine("\t A one");
     }
@@ -158,10 +154,10 @@ static void MakeChange(int cost, int[] cashTill, int twenties, int tens = 0, int
     if (changeNeeded > 0)
         throw new InvalidOperationException("InvalidOperationException: The till is unable to make change for the cash provided.");
 
-    cashTill[0] = availableOnes;
-    cashTill[1] = availableFives;
-    cashTill[2] = availableTens;
-    cashTill[3] = availableTwenties;
+    cashTill[3] = tempTwenties;
+    cashTill[2] = tempTens;
+    cashTill[1] = tempFives;
+    cashTill[0] = tempOnes;
 
 }
 
@@ -178,5 +174,4 @@ static void LogTillStatus(int[] cashTill)
 static string TillAmountSummary(int[] cashTill)
 {
     return $"The till has {cashTill[3] * 20 + cashTill[2] * 10 + cashTill[1] * 5 + cashTill[0]} dollars";
-
 }
